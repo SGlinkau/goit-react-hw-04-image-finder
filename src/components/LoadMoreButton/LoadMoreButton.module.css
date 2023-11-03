@@ -1,0 +1,11 @@
+.loaderButton {
+  background-color: #0a7cff;
+  border: none;
+  border-radius: 50px;
+  height: 40px;
+  width: 120px;
+  color: white !important;
+  cursor: pointer;
+  align-self: center;
+  margin-bottom: 50px;
+}

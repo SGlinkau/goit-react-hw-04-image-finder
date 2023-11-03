@@ -1,0 +1,24 @@
+.header {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  background-color: #0a7cff;
+}
+
+.button {
+  font-family: Optima, sans-serif;
+  cursor: pointer !important;
+  border-radius: 50px;
+  border: none;
+  margin: 15px;
+  background-color: white;
+  padding: 10px;
+}
+
+.input {
+  border-radius: 50px;
+  border: none;
+  height: 40%;
+  width: 240px;
+  text-align: center !important;
+}
