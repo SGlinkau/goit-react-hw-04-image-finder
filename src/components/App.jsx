@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import SearchBar from './SearchBar/SearchBar.jsx';
@@ -6,21 +6,24 @@ import ImageGallery from './ImageGallery/ImageGallery.jsx';
 import LoadMoreButton from './LoadMoreButton/LoadMoreButton.jsx';
 import ImageModal from './Modal/Modal.jsx';
 
-function App() {
-  const [images, setImages] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSearched, setIsSearched] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isEmptySearchQuery, setIsEmptySearchQuery] = useState(false);
+export class App extends Component {
+  state = {
+    images: [],
+    searchQuery: '',
+    isLoading: false,
+    isSearched: false,
+    currentPage: 1,
+    isModalOpen: false,
+    selectedImage: null,
+    isEmptySearchQuery: false,
+  };
 
-  const getImagesFromPixabay = async () => {
-    setIsLoading(true);
+  getImagesFromPixabay = async () => {
+    this.setState({ isLoading: true });
     try {
       const apiKey = '40228040-e1deee2d1dbd5acbce038e379';
-      const page = currentPage;
+      const searchQuery = this.state.searchQuery;
+      const page = this.state.currentPage;
       const perPage = 12;
       const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&page=${page}&per_page=${perPage}`;
 
@@ -28,81 +31,91 @@ function App() {
 
       if (response.data.hits) {
         const newImages = response.data.hits;
-        setImages(prevImages => [...prevImages, ...newImages]);
-        setIsLoading(false);
-        setIsSearched(true);
+        const images = [...this.state.images, ...newImages];
+        this.setState({ images, isLoading: false, isSearched: true });
       }
     } catch (error) {
       console.error('Błąd podczas pobierania obrazów z Pixabay', error);
-      setIsLoading(false);
-      setIsSearched(true);
+      this.setState({ isLoading: false, isSearched: true });
     }
   };
 
-  useEffect(() => {
-    if (isSearched) {
-      getImagesFromPixabay();
-    }
-  }, [currentPage, isSearched]);
-
-  const handleSearch = query => {
-    setImages([]);
-    setSearchQuery(query);
-    setIsSearched(true);
-    setCurrentPage(1);
+  handleSearch = query => {
+    this.setState(
+      {
+        images: [],
+        searchQuery: query,
+        isSearched: true,
+        currentPage: 1,
+      },
+      () => {
+        this.getImagesFromPixabay();
+      }
+    );
   };
 
-  const handleLoadMore = () => {
-    if (searchQuery.trim() === '') {
-      setIsEmptySearchQuery(true);
+  handleLoadMore = () => {
+    if (this.state.searchQuery.trim() === '') {
+      return;
     } else {
-      setCurrentPage(prevPage => prevPage + 1);
-      setIsEmptySearchQuery(false);
+      this.setState(prevState => ({
+        currentPage: prevState.currentPage + 1,
+        isEmptySearchQuery: false,
+      }));
+      this.getImagesFromPixabay();
     }
   };
 
-  const handleClear = () => {
-    setImages([]);
-    setSearchQuery('');
-    setIsSearched(false);
-    setCurrentPage(1);
-    setIsEmptySearchQuery(false);
+  handleClear = () => {
+    this.setState({
+      images: [],
+      searchQuery: '',
+      isSearched: false,
+      currentPage: 1,
+    });
   };
 
-  const openModal = image => {
-    setIsModalOpen(true);
-    setSelectedImage(image);
+  openModal = image => {
+    this.setState({ isModalOpen: true, selectedImage: image });
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedImage(null);
+  closeModal = () => {
+    this.setState({ isModalOpen: false, selectedImage: null });
   };
 
-  return (
-    <div className="App">
-      <SearchBar
-        searchQuery={searchQuery}
-        handleSearch={handleSearch}
-        handleClear={handleClear}
-      />
+  handleInputChange = query => {
+    this.setState({ searchQuery: query, isSearched: false });
+  };
 
-      <ImageGallery
-        images={images}
-        isEmptySearchQuery={isEmptySearchQuery}
-        isLoading={isLoading}
-        openModal={openModal}
-      />
+  render() {
+    return (
+      <div className="App">
+        <SearchBar
+          searchQuery={this.state.searchQuery}
+          handleSearch={this.handleSearch}
+          handleClear={this.handleClear}
+        />
 
-      <LoadMoreButton handleLoadMore={handleLoadMore} images={images} />
+        <ImageGallery
+          images={this.state.images}
+          isEmptySearchQuery={this.state.isEmptySearchQuery}
+          isLoading={this.state.isLoading}
+          openModal={this.openModal}
+        />
 
-      <ImageModal
-        isModalOpen={isModalOpen}
-        closeModal={closeModal}
-        selectedImage={selectedImage}
-      />
-    </div>
-  );
+        <LoadMoreButton
+          handleLoadMore={this.handleLoadMore}
+          images={this.state.images}
+        />
+
+        <ImageModal
+          isModalOpen={this.state.isModalOpen}
+          closeModal={this.closeModal}
+          selectedImage={this.state.selectedImage}
+        />
+      </div>
+    );
+  }
 }
 
 SearchBar.propTypes = {
