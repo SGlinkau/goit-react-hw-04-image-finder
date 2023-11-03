@@ -43,7 +43,7 @@ function App() {
     if (isSearched) {
       getImagesFromPixabay();
     }
-  }, [currentPage, isSearched, searchQuery]);
+  }, [currentPage, isSearched]);
 
   const handleSearch = query => {
     setImages([]);
