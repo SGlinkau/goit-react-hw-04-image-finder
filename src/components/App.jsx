@@ -16,12 +16,6 @@ function App() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isEmptySearchQuery, setIsEmptySearchQuery] = useState(false);
 
-  useEffect(() => {
-    if (isSearched) {
-      getImagesFromPixabay();
-    }
-  }, [currentPage, isSearched]);
-
   const getImagesFromPixabay = async () => {
     setIsLoading(true);
     try {
@@ -44,6 +38,12 @@ function App() {
       setIsSearched(true);
     }
   };
+
+  useEffect(() => {
+    if (isSearched) {
+      getImagesFromPixabay();
+    }
+  }, [currentPage, isSearched, searchQuery]);
 
   const handleSearch = query => {
     setImages([]);
